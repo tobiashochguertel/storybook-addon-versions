@@ -1,6 +1,6 @@
 {
-  "name": "@panosvoudouris/addon-versions",
-  "version": "1.0.1",
+  "name": "@tobiashochguertel/addon-versions",
+  "version": "1.0.2",
   "description": "Navigate different versions of storybook style guides.",
   "main": "dist/register.js",
   "scripts": {
@@ -17,17 +17,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/panosvoudouris/storybook-addon-versions.git"
+    "url": "git+https://github.com/tobiashochguertel/storybook-addon-versions.git"
   },
   "bugs": {
-    "url": "https://github.com/panosvoudouris/storybook-addon-versions/issues"
+    "url": "https://github.com/tobiashochguertel/storybook-addon-versions/issues"
   },
-  "homepage": "https://github.com/panosvoudouris/storybook-addon-versions#readme",
+  "homepage": "https://github.com/tobiashochguertel/storybook-addon-versions#readme",
   "keywords": [
+    "storybook-addon",
     "atomic-design",
     "react",
     "storybook",
-    "storybook-addon",
     "storybook-addon-versions",
     "versions"
   ],
