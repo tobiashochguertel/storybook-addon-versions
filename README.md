@@ -2,7 +2,7 @@
 
 ### Install
 ```
-npm i @panosvoudouris/addon-versions
+npm i @tobiashochguertel/addon-versions
 ```
 
 This addon allows you to navigate different versions of your components, if you have a setup that produces a different static Storybook build for each of your versions. As such, if you build a static Storybook and host it in, say, the following directory structure:
@@ -26,7 +26,7 @@ The addon attempts to get a list of available style guide versions from the root
 1. Include the addon in your `addons.js`
 
 ```javascript
-import '@panosvoudouris/addon-versions/register';
+import '@tobiashochguertel/addon-versions/register';
 ```
 
 2. Create the Versions config at `.storybook/storybook-config.json`
