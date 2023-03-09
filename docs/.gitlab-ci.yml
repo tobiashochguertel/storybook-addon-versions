@@ -1,18 +1,4 @@
 ---
-#%YAML 1.2
-#---
-# USAGE GUIDE:
-#
-# File: .gitlab-ci.yml
-# --------------------
-#include:
-#  - project: 'hochguertel/gitlab-ci-yml'
-#    ref: main
-#    file: '/npm/react-library.gitlab-ci.yml'
-#
-#variables:
-#   PROJECT_NAME: hochguertel-react-library
-
 stages:
   - build
   - test
@@ -39,7 +25,6 @@ debug:
     - echo $PATH
     - export
     - echo "$CONTAINER_PKG_PASSWORD" | docker login --username=$CONTAINER_PKG_USERNAME --password-stdin container.pkg.hochguertel.work
-    - if [[ ! -v NPM_PKG_AUTH_TOKEN ]]; then echo "Variable "NPM_PKG_AUTH_TOKEN" is not setuped! please setup this variable in this ci project."; fi
     - whereis node
     - whereis yarn
     - whereis npm
@@ -57,32 +42,6 @@ deploy:
   script:
     - npm unpublish --registry https://npm.pkg.hochguertel.work/ --force
     - npm publish --registry https://npm.pkg.hochguertel.work/ --force
-
-# CURRENT_VERSION=$(dasel-v1.27.3 -f ./package.json --plain .version)
-# PAGES_BRANCH="gl-pages"
-#
-# mkdir ./public/storybook-static
-# yarn build-storybook -o ./public/storybook-static/$CURRENT_VERSION
-# rm -f ./public/storybook-static/latest
-# cd ./public/storybook-static/ && ln -s $CURRENT_VERSION ./latest && cd ../..
-# pwd
-# cp .storybook/versioning/storybook-config.json ./public/storybook-static/
-# cp .storybook/versioning/index.html ./public/storybook-static/
-# .storybook/versioning/addVersion.js ./public/storybook-static/ ./public/storybook-static/storybook-config.json
-
-# Steps to create an empty brach:
-# CI_COMMIT_SHA=$(git rev-parse HEAD)
-#
-# git checkout --orphan gl-pages
-#
-# touch .nojekyll
-# git add .nojekyll
-# git commit -m "Initial"
-# git push --set-upstream origin gl-pages
-#
-# git show-ref -q --heads $PAGES_BRANCH && git branch -D $PAGES_BRANCH
-# git fetch origin $PAGES_BRANCH && git checkout -b $PAGES_BRANCH origin/$PAGES_BRANCH || echo "Pages branch not deployed yet."
-# git checkout $CI_COMMIT_SHA
 
 .pages:
   stage: build
