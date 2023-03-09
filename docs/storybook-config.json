@@ -1,0 +1,10 @@
+{
+  "storybook": {
+    "versions": {
+      "availableVersions": [
+        "1.0.0"
+      ],
+      "regex": "\/([^\/]+?)\/?$"
+    }
+  }
+}

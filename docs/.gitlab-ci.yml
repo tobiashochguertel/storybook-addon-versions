@@ -1,0 +1,162 @@
+---
+#%YAML 1.2
+#---
+# USAGE GUIDE:
+#
+# File: .gitlab-ci.yml
+# --------------------
+#include:
+#  - project: 'hochguertel/gitlab-ci-yml'
+#    ref: main
+#    file: '/npm/react-library.gitlab-ci.yml'
+#
+#variables:
+#   PROJECT_NAME: hochguertel-react-library
+
+stages:
+  - build
+  - test
+  - deploy
+
+default:
+  image: node:16.19.1
+
+variables:
+  PROJECT_NAME: hochguertel-react-library
+
+cache: &global_cache
+  key: $CI_COMMIT_REF_SLUG
+  untracked: true
+  paths:
+    - ./**/node_modules
+  policy: pull-push
+
+debug:
+  stage: build
+  tags:
+    - shell
+  script:
+    - echo $PATH
+    - export
+    - echo "$CONTAINER_PKG_PASSWORD" | docker login --username=$CONTAINER_PKG_USERNAME --password-stdin container.pkg.hochguertel.work
+    - if [[ ! -v NPM_PKG_AUTH_TOKEN ]]; then echo "Variable "NPM_PKG_AUTH_TOKEN" is not setuped! please setup this variable in this ci project."; fi
+    - whereis node
+    - whereis yarn
+    - whereis npm
+
+build:
+  stage: build
+  script:
+    - test -f .npmrc  && cat .npmrc
+    - test ! -f .npmrc  && echo "Missing .npmrc file! It's needed for publishing the project as a package!"
+    - yarn install
+
+deploy:
+  stage: deploy
+  needs: ['build']
+  script:
+    - npm unpublish --registry https://npm.pkg.hochguertel.work/ --force
+    - npm publish --registry https://npm.pkg.hochguertel.work/ --force
+
+# CURRENT_VERSION=$(dasel-v1.27.3 -f ./package.json --plain .version)
+# PAGES_BRANCH="gl-pages"
+#
+# mkdir ./public/storybook-static
+# yarn build-storybook -o ./public/storybook-static/$CURRENT_VERSION
+# rm -f ./public/storybook-static/latest
+# cd ./public/storybook-static/ && ln -s $CURRENT_VERSION ./latest && cd ../..
+# pwd
+# cp .storybook/versioning/storybook-config.json ./public/storybook-static/
+# cp .storybook/versioning/index.html ./public/storybook-static/
+# .storybook/versioning/addVersion.js ./public/storybook-static/ ./public/storybook-static/storybook-config.json
+
+# Steps to create an empty brach:
+# CI_COMMIT_SHA=$(git rev-parse HEAD)
+#
+# git checkout --orphan gl-pages
+#
+# touch .nojekyll
+# git add .nojekyll
+# git commit -m "Initial"
+# git push --set-upstream origin gl-pages
+#
+# git show-ref -q --heads $PAGES_BRANCH && git branch -D $PAGES_BRANCH
+# git fetch origin $PAGES_BRANCH && git checkout -b $PAGES_BRANCH origin/$PAGES_BRANCH || echo "Pages branch not deployed yet."
+# git checkout $CI_COMMIT_SHA
+
+.pages:
+  stage: build
+  resource_group: build-page
+  variables:
+    PAGES_BRANCH: gl-pages
+    HTTPS_REMOTE: https://gitlab-ci-token:${FUNCTIONAL_USER_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+    PAGES_TAG: $CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        PAGES_TAG: 'latest'
+    - if: $CI_COMMIT_REF_NAME =~ /^v/
+  before_script:
+    - git version
+    - curl -sSLf "$(curl -sSLf https://api.github.com/repos/tomwright/dasel/releases/tags/v1.27.3 | grep browser_download_url | grep linux_amd64 | grep -v .gz | cut -d\" -f 4)" -L -o dasel && chmod +x dasel
+    - mv ./dasel /usr/local/bin/dasel
+    - git config user.name $GITLAB_USER_NAME
+    - git config user.email $GITLAB_USER_EMAIL
+    # CI_COMMIT_SHA=$(git rev-parse HEAD)
+    - git show-ref -q --heads $PAGES_BRANCH && git branch -D $PAGES_BRANCH
+    - git fetch origin $PAGES_BRANCH && git checkout -b $PAGES_BRANCH origin/$PAGES_BRANCH || echo "Pages branch not deployed yet."
+    - test -d ./public && cd ./public && PAGES_VERSIONS=$(find . -type d -maxdepth 1 | sed '1d' | sed 's/\.\///') && cd ..
+    - echo "$PAGES_VERSIONS"
+    - ls -lha
+    - git checkout $CI_COMMIT_SHA
+    - ls -lha
+    - test -d ./docs && rm -rf ./docs
+    - test -d ./public && rm -rf ./public
+  script:
+    - CURRENT_VERSION=$(/usr/local/bin/dasel -f ./package.json --plain .version)
+    - BUILD_DIR="./public"
+    - echo "$CURRENT_VERSION"
+    - echo $BUILD_DIR
+    - test -d $BUILD_DIR && rm -rf "${BUILD_DIR:?}/$CURRENT_VERSION"
+    - mkdir -p "$BUILD_DIR"
+    - yarn build-storybook --quiet -o "$BUILD_DIR/$CURRENT_VERSION"
+    - pwd
+    - ls
+    - cp .storybook/versioning/storybook-config.json "$BUILD_DIR/"
+    - cp .storybook/versioning/index.html "$BUILD_DIR/"
+    - test -f "$BUILD_DIR/storybook-config.json" && cat "$BUILD_DIR/storybook-config.json" && echo -e "\n"
+    # - test -f "$BUILD_DIR/storybook-config.json" && mv -f "$BUILD_DIR/storybook-config.json" "$BUILD_DIR/storybook-config.json.new"
+    - git checkout $PAGES_BRANCH
+    - rm -f "$BUILD_DIR/latest"
+    - cd $BUILD_DIR && ln -s "$CURRENT_VERSION" ./latest && cd ..
+    - /usr/local/bin/dasel delete -p json -f ./public/storybook-config.json ".storybook.versions.availableVersions"
+    - for PAGES_VERSION in $PAGES_VERSIONS; do /usr/local/bin/dasel put string -p json -f $BUILD_DIR/storybook-config.json -m ".storybook.versions.availableVersions.[]" "$PAGES_VERSION"; done
+    # - cat $BUILD_DIR/storybook-config.json | /usr/local/bin/dasel select -p json .storybook.versions.availableVersions --plain | grep "$CURRENT_VERSION" && /usr/local/bin/dasel put string -p json -f $BUILD_DIR/storybook-config.json -m ".storybook.versions.availableVersions.[]" "$CURRENT_VERSION"
+    - test -f "$BUILD_DIR/storybook-config.json" && cat "$BUILD_DIR/storybook-config.json" && echo -e "\n"
+    - git add -A "$BUILD_DIR"
+    - git diff-index --quiet HEAD && echo "Nothing to commit..." || git commit --untracked-files=no -m "Add version $CURRENT_VERSION"
+    - git push $HTTPS_REMOTE gl-pages
+  after_script:
+    - test -d ./docs && rm -rf ./docs
+    - test -d ./public && rm -rf ./public
+
+build-page:
+  extends: .pages
+  needs: ['build']
+
+pages:
+  stage: deploy
+  needs: ['build-page']
+  variables:
+    PAGES_BRANCH: gl-pages
+    PAGES_TAG: $CI_COMMIT_TAG
+  script:
+    - git checkout $PAGES_BRANCH -- public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        PAGES_TAG: 'latest'
+    - if: $CI_COMMIT_REF_NAME =~ /^v/
