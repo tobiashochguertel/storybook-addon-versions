@@ -1,12 +1,14 @@
 # storybook-addon-versions
 
-### Install
-```
+## Install
+
+```sh
 npm i @tobiashochguertel/addon-versions
 ```
 
 This addon allows you to navigate different versions of your components, if you have a setup that produces a different static Storybook build for each of your versions. As such, if you build a static Storybook and host it in, say, the following directory structure:
-```
+
+```sh
 - static-storybook
 |-- 0.0.1
 |-- 0.0.2
@@ -19,9 +21,10 @@ the addon will allow you to navigate the various versions via the `Versions` pan
 ![Versions demo](./docs/versions-demo.gif)
 
 ## Configuration
+
 The addon attempts to get a list of available style guide versions from the root of your host. If they are found it will show a dropdown which then lets you navigate to the various versions, as such allowing users to see how a component may have changed over different versions.
 
-### Usage
+## Usage
 
 1. Include the addon in your `addons.js`
 
@@ -59,4 +62,4 @@ work in a local dev build but *not* in your normal hosted config.
 
 ### Notes
 
-This is a fork of https://github.com/buildit/storybook-addon-versions It appears that repo is now defunct and no longer maintained so I've forked it to continue maintenance (eg upgrade for latest storybook etc) and upgrades.
+This is a fork of https://github.com/panosvoudouris/storybook-addon-versions It appears that repo is now defunct and no longer maintained so I've forked it to continue maintenance (eg upgrade for latest storybook etc) and upgrades.
