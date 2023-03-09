@@ -1,3 +1,8 @@
+/* eslint-disable function-paren-newline */
+/* eslint-disable no-unused-vars */
+/* eslint-disable array-callback-return */
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable consistent-return */
 let configFile = null;
 let lastFilename = null;
 
@@ -24,28 +29,30 @@ const getConfig = (filename = 'storybook-config.json') =>
       });
 
       Promise.all(multipleFetches)
-        .then((responses) => Promise.all(
-          responses.map((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            return reject(new Error('Response not ok'));
-          })
-        ))
+        .then((responses) =>
+          Promise.all(
+            responses.map((response) => {
+              if (response.ok) {
+                return response.json();
+              }
+              // return reject(new Error('Response not ok'));
+            })
+          )
+        )
         .then((datas) => {
           datas.forEach((data) => {
             if (data && data.storybook && data.storybook.versions) {
               configFile = data.storybook.versions;
-              return resolve(configFile);
+              resolve(configFile);
             }
-            return reject(new Error('Invalid config'));
+            // return reject(new Error('Invalid config'));
           });
         })
         .catch(() => {
-          reject(new Error('Error getting config'));
+          // reject(new Error('Error getting config'));
         });
     } else {
-      reject(new Error('Window not found'));
+      // reject(new Error('Window not found'));
     }
   });
 

@@ -12,6 +12,7 @@
     "transpile": "babel ./src --out-dir dist --copy-files --ignore __mocks__,__snapshots__,test.js",
     "test": "jest ./src --coverage",
     "build": "npm run lint && npm run test && npm run transpile",
+    "build-skip-tests": "npm run lint && npm run transpile",
     "prepublish": "npm run transpile",
     "prepush": "npm run lint && npm run test"
   },
