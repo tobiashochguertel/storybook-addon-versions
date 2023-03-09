@@ -8,7 +8,7 @@ addons.register('versions', (api) => {
   const channel = addons.getChannel();
 
   addons.addPanel('versions', {
-    title: 'versions',
+    title: 'Versions',
     render: ({ active }) => ( // eslint-disable-line
       <Panel
         channel={channel}

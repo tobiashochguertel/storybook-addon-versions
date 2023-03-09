@@ -81,6 +81,8 @@
     ],
     "moduleNameMapper": {
       "\\.css$": "<rootDir>/__mocks__/styleMock.js"
-    }
+    },
+    "setupFilesAfterEnv": ["./jest.setup.js"],
+    "verbose": true
   }
 }
