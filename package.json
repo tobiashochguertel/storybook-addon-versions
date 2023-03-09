@@ -1,6 +1,6 @@
 {
   "name": "@tobiashochguertel/addon-versions",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Navigate different versions of storybook style guides.",
   "main": "dist/register.js",
   "scripts": {
@@ -82,7 +82,9 @@
     "moduleNameMapper": {
       "\\.css$": "<rootDir>/__mocks__/styleMock.js"
     },
-    "setupFilesAfterEnv": ["./jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ],
     "verbose": true
   }
 }
